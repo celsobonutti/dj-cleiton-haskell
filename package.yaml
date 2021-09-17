@@ -14,11 +14,15 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
-- discord-haskell == 1.8.8
-- ffmpeg-light == 0.14.0
-- text >= 1.2.0.0
-- protolude >= 0.3.0
-- unliftio >= 0.2.20
+- discord-haskell == 1.8.8 && < 2.0
+- ffmpeg-light == 0.14.0 && < 0.15
+- text >= 1.2.0.0 && < 2.0
+- protolude >= 0.3.0 && < 0.4
+- unliftio >= 0.2.20 && < 0.3
+- turtle >= 1.5.22 && < 2
+- megaparsec >= 9.1.0 && < 10
+- parser-combinators >= 1.3.0 && < 1.4.0
+- containers >= 0.6.5.1 && < 0.7
 
 library:
   source-dirs: src

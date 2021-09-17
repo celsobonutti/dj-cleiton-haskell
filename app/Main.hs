@@ -4,4 +4,4 @@ import Protolude
 import Cleiton
 
 main :: IO ()
-main = pingpongExample
+main = rasta

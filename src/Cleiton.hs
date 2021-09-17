@@ -1,5 +1,5 @@
 module Cleiton
-    ( pingpongExample
+    ( rasta
     ) where
 
 import Control.Monad (when, forM_, void)
@@ -14,27 +14,32 @@ import Discord.Types
 import qualified Discord.Requests as R
 import Protolude hiding (threadDelay, String, ByteString, putStrLn)
 
--- | Replies "pong" to every message that starts with "ping"
-pingpongExample :: IO ()
-pingpongExample = do
+import Text.Megaparsec (parseMaybe)
+import qualified Parser
+import Commands
+import qualified Queue
+import Data.IORef
+
+commandParser = Parser.make "λ"
+
+rasta :: IO ()
+rasta = do
+  queue <- Queue.empty
   tok <- TIO.readFile "./auth-token.secret"
 
-  -- open ghci and run  [[ :info RunDiscordOpts ]] to see available fields
   t <- runDiscord $ def { discordToken = tok
                         , discordOnStart = startHandler
                         , discordOnEnd = liftIO $ TIO.putStrLn "Ended"
-                        , discordOnEvent = eventHandler
+                        , discordOnEvent = eventHandler queue
                         , discordOnLog = \s -> TIO.putStrLn s >> TIO.putStrLn ""
                         }
   TIO.putStrLn t
 
--- If the start handler throws an exception, discord-haskell will gracefully shutdown
---     Use place to execute commands you know you want to complete
 startHandler :: DiscordHandler ()
 startHandler = do
   Right partialGuilds <- restCall R.GetCurrentUserGuilds
 
-  let activity = Activity { activityName = "ping-pong"
+  let activity = Activity { activityName = "cleiton-rasta"
                           , activityType = ActivityTypeGame
                           , activityUrl = Nothing
                           }
@@ -45,46 +50,22 @@ startHandler = do
                               }
   sendCommand (UpdateStatus opts)
 
-  forM_ partialGuilds $ \pg -> do
-    Right guild <- restCall $ R.GetGuild (partialGuildId pg)
-    Right chans <- restCall $ R.GetGuildChannels (guildId guild)
-    forM_ (take 1 (filter isTextChannel chans))
-      (\channel -> restCall $ R.CreateMessage (channelId channel)
-                                      "Vamo debochá legal")
+eventHandler :: Queue.Queue -> Event -> DiscordHandler ()
+eventHandler queue event = case event of
+      MessageCreate m -> do
+        case parseMaybe commandParser (messageText m) of
+          Just (Play song) -> do
+            void $ restCall (R.CreateMessage (messageChannel m) ("taca-lhe pau playboy: " <> song))
+            liftIO (Queue.addSong queue song)
+            newQueue <- liftIO . readIORef $ queue
+            void $ restCall (R.CreateMessage (messageChannel m) (Queue.print newQueue))
 
+          Just (Remove number) -> do
+            void $ restCall (R.CreateMessage (messageChannel m) "ê rural")
 
--- If an event handler throws an exception, discord-haskell will continue to run
-eventHandler :: Event -> DiscordHandler ()
-eventHandler event = case event of
-      MessageCreate m -> when (not (fromBot m) && isPing m) $ do
-        void $ restCall (R.CreateReaction (messageChannel m, messageId m) "eyes")
-        threadDelay (2 * 10^(6 :: Int))
-
-        -- A very simple message.
-        void $ restCall (R.CreateMessage (messageChannel m) "é cabeça de gelo!")
-
-        -- A more complex message. Text-to-speech, does not mention everyone nor
-        -- the user, and uses Discord native replies.
-        -- Use ":info" in ghci to explore the type
-        -- let opts :: R.MessageDetailedOpts
-        --     opts = def { R.messageDetailedContent = "Here's a more complex message, but doesn't ping @everyone!"
-        --                , R.messageDetailedTTS = True
-        --                , R.messageDetailedAllowedMentions = Just $
-        --                   def { R.mentionEveryone = False
-        --                       , R.mentionRepliedUser = False
-        --                       }
-        --                , R.messageDetailedReference = Just $
-        --                   def { referenceMessageId = Just $ messageId m }
-        --                }
-        -- void $ restCall (R.CreateMessageDetailed (messageChannel m) opts)
+          _ -> liftIO $ TIO.putStrLn (messageText m)
       _ -> return ()
 
 isTextChannel :: Channel -> Bool
 isTextChannel ChannelText {} = True
 isTextChannel _ = False
-
-fromBot :: Message -> Bool
-fromBot = userIsBot . messageAuthor
-
-isPing :: Message -> Bool
-isPing = ("nego" `T.isPrefixOf`) . T.toLower . messageText
