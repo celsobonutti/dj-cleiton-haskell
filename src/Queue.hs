@@ -18,8 +18,9 @@ empty = newIORef $ QueueState 0 Map.empty
 addSong :: Queue -> Text -> IO ()
 addSong queue song = modifyIORef' queue addSong'
   where
-    addSong' QueueState { next, songs } = QueueState { next = next + 1, songs = newSongs next songs song }
-    newSongs next currentSongs newSong = Map.insert next newSong currentSongs
+    addSong' QueueState { next, songs } = QueueState { next = next + 1
+                                                     , songs = Map.insert next song songs
+                                                     }
 
 print :: QueueState -> Text
 print = unlines . fmap printTuple . Map.toList . songs
