@@ -22,7 +22,7 @@ addSong queue song = modifyIORef' queue addSong'
     newSongs next currentSongs newSong = Map.insert next newSong currentSongs
 
 print :: QueueState -> Text
-print = unwords . intersperse "\n" . fmap printTuple . Map.toList . songs
+print = unlines . fmap printTuple . Map.toList . songs
   where
     printTuple :: (Int, Text) -> Text
     printTuple (fst, snd) = show fst <> ". " <> show snd
