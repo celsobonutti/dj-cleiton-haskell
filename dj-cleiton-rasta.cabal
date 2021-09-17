@@ -1,0 +1,90 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           dj-cleiton-rasta
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/dj-cleiton-rasta#readme>
+homepage:       https://github.com/celsobonutti/dj-cleiton-rasta#readme
+bug-reports:    https://github.com/celsobonutti/dj-cleiton-rasta/issues
+author:         Celso Bonutti
+maintainer:     i.am@cel.so
+copyright:      2021 Celso Bonutti
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/celsobonutti/dj-cleiton-rasta
+
+library
+  exposed-modules:
+      Cleiton
+  other-modules:
+      Paths_dj_cleiton_rasta
+  hs-source-dirs:
+      src
+  default-extensions:
+      NoImplicitPrelude
+      OverloadedStrings
+      NamedFieldPuns
+      DuplicateRecordFields
+  build-depends:
+      base >=4.7 && <5
+    , discord-haskell ==1.8.8
+    , ffmpeg-light ==0.14.0
+    , protolude >=0.3.0
+    , text >=1.2.0.0
+    , unliftio >=0.2.20
+  default-language: Haskell2010
+
+executable dj-cleiton-rasta-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_dj_cleiton_rasta
+  hs-source-dirs:
+      app
+  default-extensions:
+      NoImplicitPrelude
+      OverloadedStrings
+      NamedFieldPuns
+      DuplicateRecordFields
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , discord-haskell ==1.8.8
+    , dj-cleiton-rasta
+    , ffmpeg-light ==0.14.0
+    , protolude >=0.3.0
+    , text >=1.2.0.0
+    , unliftio >=0.2.20
+  default-language: Haskell2010
+
+test-suite dj-cleiton-rasta-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_dj_cleiton_rasta
+  hs-source-dirs:
+      test
+  default-extensions:
+      NoImplicitPrelude
+      OverloadedStrings
+      NamedFieldPuns
+      DuplicateRecordFields
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , discord-haskell ==1.8.8
+    , dj-cleiton-rasta
+    , ffmpeg-light ==0.14.0
+    , protolude >=0.3.0
+    , text >=1.2.0.0
+    , unliftio >=0.2.20
+  default-language: Haskell2010

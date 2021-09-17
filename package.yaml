@@ -1,0 +1,52 @@
+name:                dj-cleiton-rasta
+version:             0.1.0.0
+github:              "celsobonutti/dj-cleiton-rasta"
+license:             BSD3
+author:              "Celso Bonutti"
+maintainer:          "i.am@cel.so"
+copyright:           "2021 Celso Bonutti"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+description:         Please see the README on GitHub at <https://github.com/githubuser/dj-cleiton-rasta#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- discord-haskell == 1.8.8
+- ffmpeg-light == 0.14.0
+- text >= 1.2.0.0
+- protolude >= 0.3.0
+- unliftio >= 0.2.20
+
+library:
+  source-dirs: src
+
+executables:
+  dj-cleiton-rasta-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - dj-cleiton-rasta
+
+tests:
+  dj-cleiton-rasta-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - dj-cleiton-rasta
+
+default-extensions:
+  - NoImplicitPrelude
+  - OverloadedStrings
+  - NamedFieldPuns
+  - DuplicateRecordFields
