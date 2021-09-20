@@ -46,6 +46,8 @@ extra-deps:
 - binary-0.8.9.0@sha256:9cac9a1d86bfa3e7f75cc8bffaa256f3967ebb6d76f67a42f9679384c5c5e18a,6523
 - parsec-3.1.14.0@sha256:72d5c57e6e126adaa781ab97b19dc76f68490c0a3d88f14038219994cabe94e1,4356
 - text-1.2.5.0@sha256:791f0f6c97ed96113f17ab520cf0efe1a3a4f883a8c85910a5660567c8241c40,7895
+- req-3.9.1@sha256:e5cc547cc37cb60b809b0d1abba4623abe6f1af40911dde38e2fc8b16630a177,3747
+- http-client-0.7.9@sha256:4fe29d5ed114a61de32be77858af386dbb30cda8852aff4a9e30ccc351ae3b86,5400
 
 #
 # Override default flag values for local packages and extra-deps

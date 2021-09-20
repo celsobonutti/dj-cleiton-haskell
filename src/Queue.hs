@@ -1,29 +1,42 @@
 module Queue where
 
-import Data.IORef
-import Data.Map (Map)
-import qualified Data.Map as Map
-import Protolude
-import Data.Text hiding (intersperse)
+import           Data.IORef
+import           Data.Map                       ( Map )
+import qualified Data.Map                      as Map
+import           Data.Sequence                  ( (<|)
+                                                , Seq(..)
+                                                )
+import qualified Data.Sequence                 as Seq
+import           Data.Text               hiding ( intersperse
+                                                , map
+                                                )
+import           Protolude               hiding ( map )
 
-data QueueState = QueueState { next :: Int
-                             , songs :: Map Int Text
-                             }
+type Song = Text
 
-type Queue = IORef QueueState
+newtype Queue = Queue {songs :: Seq Song}
+  deriving (Show)
 
-empty :: IO Queue
-empty = newIORef $ QueueState 0 Map.empty
+empty :: Queue
+empty = Queue Seq.empty
 
-addSong :: Queue -> Text -> IO ()
-addSong queue song = modifyIORef' queue addSong'
-  where
-    addSong' QueueState { next, songs } = QueueState { next = next + 1
-                                                     , songs = Map.insert next song songs
-                                                     }
+map :: (Seq Song -> Seq Song) -> Queue -> Queue
+map f = Queue . f . songs
 
-print :: QueueState -> Text
-print = unlines . fmap printTuple . Map.toList . songs
-  where
-    printTuple :: (Int, Text) -> Text
-    printTuple (fst, snd) = show fst <> ". " <> show snd
+addSong :: Song -> Queue -> Queue
+addSong = map . (:<|)
+
+skip :: Queue -> Queue
+skip = map skip'
+ where
+  skip' Empty         = Empty
+  skip' (songs :|> _) = songs
+
+removeSongByIndex :: Int -> Queue -> Queue
+removeSongByIndex = map . Seq.deleteAt
+
+print :: Queue -> Text
+print = unlines . toList . Seq.mapWithIndex print . songs
+ where
+  print :: Int -> Song -> Text
+  print index song = show index <> ". " <> show song
