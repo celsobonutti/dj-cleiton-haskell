@@ -43,6 +43,7 @@ library
       aeson ==1.5.*
     , base >=4.7 && <5
     , containers >=0.6.5.1 && <0.7
+    , data-default >=0.7.1.1 && <0.8
     , discord-haskell ==1.8.8 && <2.0
     , ffmpeg-light ==0.14.0 && <0.15
     , megaparsec >=9.1.0 && <10
@@ -70,6 +71,7 @@ executable dj-cleiton-rasta-exe
       aeson ==1.5.*
     , base >=4.7 && <5
     , containers >=0.6.5.1 && <0.7
+    , data-default >=0.7.1.1 && <0.8
     , discord-haskell ==1.8.8 && <2.0
     , dj-cleiton-rasta
     , ffmpeg-light ==0.14.0 && <0.15
@@ -99,6 +101,7 @@ test-suite dj-cleiton-rasta-test
       aeson ==1.5.*
     , base >=4.7 && <5
     , containers >=0.6.5.1 && <0.7
+    , data-default >=0.7.1.1 && <0.8
     , discord-haskell ==1.8.8 && <2.0
     , dj-cleiton-rasta
     , ffmpeg-light ==0.14.0 && <0.15

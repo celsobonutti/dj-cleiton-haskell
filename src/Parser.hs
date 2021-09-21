@@ -21,7 +21,7 @@ make :: Text -> Parser Commands.T
 make prefix = string prefix *> parseCommand
 
 parseCommand :: Parser Commands.T
-parseCommand = choice [parsePlay]
+parseCommand = choice [parsePlay, parseRemove, parseSkip, parseList]
 
 parsePlay :: Parser Commands.T
 parsePlay = do
@@ -38,3 +38,6 @@ parseRemove = do
 
 parseSkip :: Parser Commands.T
 parseSkip = Commands.Skip <$ string' "skip"
+
+parseList :: Parser Commands.T
+parseList = Commands.List <$ string' "list"

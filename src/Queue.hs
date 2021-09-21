@@ -1,21 +1,24 @@
 module Queue where
 
+import           Data.Default
 import           Data.IORef
-import           Data.Map                       ( Map )
-import qualified Data.Map                      as Map
-import           Data.Sequence                  ( (<|)
-                                                , Seq(..)
-                                                )
+import           Data.Sequence                  ( Seq(..) )
 import qualified Data.Sequence                 as Seq
 import           Data.Text               hiding ( intersperse
                                                 , map
                                                 )
+import           Discord.Internal.Types.Embed
 import           Protolude               hiding ( map )
 
-type Song = Text
+data Song = Song
+  { title       :: Text
+  , videoId     :: Text
+  , description :: Text
+  , thumbnail   :: Text
+  }
+  deriving Eq
 
 newtype Queue = Queue {songs :: Seq Song}
-  deriving (Show)
 
 empty :: Queue
 empty = Queue Seq.empty
@@ -24,13 +27,11 @@ map :: (Seq Song -> Seq Song) -> Queue -> Queue
 map f = Queue . f . songs
 
 addSong :: Song -> Queue -> Queue
-addSong = map . (:<|)
+addSong song = map (:|> song)
 
-skip :: Queue -> Queue
-skip = map skip'
- where
-  skip' Empty         = Empty
-  skip' (songs :|> _) = songs
+skip :: Queue -> (Queue, Maybe Song)
+skip Queue { songs = Empty }            = (Queue Empty, Nothing)
+skip Queue { songs = (song :<| songs) } = (Queue songs, Just song)
 
 removeSongByIndex :: Int -> Queue -> Queue
 removeSongByIndex = map . Seq.deleteAt
@@ -39,4 +40,12 @@ print :: Queue -> Text
 print = unlines . toList . Seq.mapWithIndex print . songs
  where
   print :: Int -> Song -> Text
-  print index song = show index <> ". " <> show song
+  print index song = show (index + 1) <> ". " <> title song
+
+toEmbed :: Song -> CreateEmbed
+toEmbed song = def
+  { createEmbedTitle       = title song
+  , createEmbedDescription = description song
+  , createEmbedUrl         = "https://www.youtube.com/watch?v=" <> videoId song
+  , createEmbedThumbnail   = Just (CreateEmbedImageUrl . thumbnail $ song)
+  }

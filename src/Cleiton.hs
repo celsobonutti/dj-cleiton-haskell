@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Cleiton
@@ -15,6 +14,7 @@ import           Data.IORef
 import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as TIO
 import           Discord
+import qualified Discord.Internal.Rest         as R
 import qualified Discord.Requests              as R
 import           Discord.Types
 import           Network.HTTP.Req
@@ -30,24 +30,13 @@ import           UnliftIO                       ( liftIO )
 import           UnliftIO.Concurrent
 import qualified YouTube
 
-data Video = Video
-  { title :: Text
-  , id    :: Text
-  }
-  deriving (Generic, Show)
-
-instance ToJSON Video where
-  toEncoding = genericToEncoding defaultOptions
-
-instance FromJSON Video
-
 commandParser = Parser.make "λ"
 
 rasta :: IO ()
 rasta = do
   queue        <- newIORef Queue.empty
   tok          <- TIO.readFile "./auth-token.secret"
-  youtubeToken <- readFile "./auth-token.secret"
+  youtubeToken <- readFile "./youtube-token.secret"
 
   t <- runDiscord $ def { discordToken   = tok
                         , discordOnStart = startHandler
@@ -74,27 +63,39 @@ startHandler = do
 
 eventHandler :: IORef Queue -> Text -> Event -> DiscordHandler ()
 eventHandler queue youtubeToken event = case event of
-  MessageCreate m -> do
-    case parseMaybe commandParser (messageText m) of
-      Just (Play song) -> do
-        void
-          $ restCall
-              (R.CreateMessage (messageChannel m)
-                               ("taca-lhe pau playboy: " <> song)
-              )
-        liftIO $ modifyIORef' queue $ Queue.addSong song
-        -- request <- liftIO . runReq defaultHttpConfig $ YouTube.fetch
-        --   youtubeToken
-        --   song
-        -- liftIO $ print (responseBody r :: Video)
-        newQueue <- liftIO . readIORef $ queue
-        void $ restCall
-          (R.CreateMessage (messageChannel m) (Queue.print newQueue))
-      Just (Remove number) -> do
-        void $ restCall (R.CreateMessage (messageChannel m) "ê rural")
-      _ -> liftIO $ TIO.putStrLn (messageText m)
+  MessageCreate message -> do
+    let channel = messageChannel message
+        sendMessage content = void $ restCall (R.CreateMessage channel content)
+    case parseMaybe commandParser (messageText message) of
+      Just (Play song) -> addSong queue youtubeToken channel song
+
+      Just List        -> do
+        queue <- liftIO . readIORef $ queue
+        sendMessage $ Queue.print queue
+
+      Just Skip -> do
+        result <- liftIO $ atomicModifyIORef' queue Queue.skip
+        case result of
+          Just removed -> sendMessage $ "Tirando: " <> Queue.title removed
+          Nothing      -> sendMessage "Tem música não porra"
+
+      _ -> liftIO $ TIO.putStrLn (messageText message)
   _ -> return ()
 
-isTextChannel :: Channel -> Bool
-isTextChannel ChannelText{} = True
-isTextChannel _             = False
+addSong
+  :: IORef Queue -> Text -> ChannelId -> Text -> ReaderT DiscordHandle IO ()
+addSong queue youtubeToken channel song = do
+  request <- liftIO . runReq defaultHttpConfig $ YouTube.fetch youtubeToken song
+  case YouTube.toSong . responseBody $ request of
+    Just song -> do
+      liftIO $ modifyIORef' queue (Queue.addSong song)
+      newQueue <- liftIO . readIORef $ queue
+      void $ restCall
+        (R.CreateMessageEmbed channel
+                              "Bora debochar legal com"
+                              (Queue.toEmbed song)
+        )
+
+    Nothing ->
+      void $ restCall
+        (R.CreateMessage channel "Deu ruim, essa porra existe mesmo?")

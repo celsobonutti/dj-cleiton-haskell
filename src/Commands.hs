@@ -7,4 +7,5 @@ data T
   = Play Text
   | Remove Int
   | Skip
+  | List
   deriving (Eq, Ord, Show)
