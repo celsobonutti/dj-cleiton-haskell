@@ -1,7 +1,8 @@
 module Main where
 
-import Protolude
-import Cleiton
+import           Cleiton
+import           Protolude
+import           System.Process.Typed
 
 main :: IO ()
 main = rasta
