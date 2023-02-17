@@ -15,7 +15,6 @@ import Data.Aeson
 import Data.IORef
 import Data.Text
 import qualified Data.Text as T
-import Data.Text.IO (readFile)
 import qualified Data.Text.IO as TIO
 import Discord
 import qualified Discord.Internal.Rest as R
@@ -25,6 +24,7 @@ import Network.HTTP.Req
 import qualified Parser
 import Queue (Queue)
 import qualified Queue
+import System.Environment (getEnv)
 import Text.Megaparsec (parseMaybe)
 import UnliftIO (liftIO)
 import UnliftIO.Concurrent
@@ -36,8 +36,8 @@ commandParser = Parser.make "λ"
 rasta :: IO ()
 rasta = do
     queue <- newIORef Queue.empty
-    tok <- TIO.readFile "./auth-token.secret"
-    youtubeToken <- readFile "./youtube-token.secret"
+    tok <- pack <$> getEnv "DISCORD_TOKEN"
+    youtubeToken <- pack <$> getEnv "YOUTUBE_TOKEN"
 
     t <-
         runDiscord $

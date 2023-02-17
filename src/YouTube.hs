@@ -94,9 +94,9 @@ toSong Response{items = []} = Nothing
 toSong Response{items = (song : _)} =
     Just
         ( Queue.Song
-            { title = title . snippet $ song
-            , description = description . snippet $ song
-            , videoId = videoId . id $ song
-            , thumbnail = url . medium . thumbnails . snippet $ song
+            { title = song.snippet.title
+            , description = song.snippet.description
+            , videoId = song.id.videoId
+            , thumbnail = song.snippet.thumbnails.medium.url
             }
         )
