@@ -3,21 +3,23 @@
 
 module YouTube where
 
-import           Data.Aeson
-import           Data.Text
-import           Discord.Internal.Types.Embed
-import           Network.HTTP.Req
-import           Protolude               hiding ( Option )
+import Data.Aeson
+import Data.Text
+import Discord.Internal.Types.Embed
+import GHC.Generics
+import Network.HTTP.Req
 import qualified Queue
+import Prelude hiding (id)
 
 default (Text)
 
-fetch token query = req
-    GET
-    (https "youtube.googleapis.com" /: "youtube" /: "v3" /: "search")
-    NoReqBody
-    jsonResponse
-    (options token query)
+fetch token query =
+    req
+        GET
+        (https "youtube.googleapis.com" /: "youtube" /: "v3" /: "search")
+        NoReqBody
+        jsonResponse
+        (options token query)
 
 options token query =
     ("key" =: token)
@@ -25,7 +27,7 @@ options token query =
         <> ("q" =: query)
         <> ("maxResults" =: "1")
 
-newtype VideoId = VideoId { videoId :: Text } deriving (Generic, Show)
+newtype VideoId = VideoId {videoId :: Text} deriving (Generic, Show)
 
 instance ToJSON VideoId where
     toEncoding = genericToEncoding defaultOptions
@@ -33,8 +35,8 @@ instance ToJSON VideoId where
 instance FromJSON VideoId
 
 data VideoThumbnail = VideoThumbnail
-    { url    :: Text
-    , width  :: Int
+    { url :: Text
+    , width :: Int
     , height :: Int
     }
     deriving (Generic, Show)
@@ -46,7 +48,8 @@ instance FromJSON VideoThumbnail
 
 newtype VideoThumbnails = VideoThumbnails
     { medium :: VideoThumbnail
-    } deriving (Generic, Show)
+    }
+    deriving (Generic, Show)
 
 instance ToJSON VideoThumbnails where
     toEncoding = genericToEncoding defaultOptions
@@ -54,9 +57,9 @@ instance ToJSON VideoThumbnails where
 instance FromJSON VideoThumbnails
 
 data VideoSnippet = VideoSnippet
-    { title       :: Text
+    { title :: Text
     , description :: Text
-    , thumbnails  :: VideoThumbnails
+    , thumbnails :: VideoThumbnails
     }
     deriving (Generic, Show)
 
@@ -66,7 +69,7 @@ instance ToJSON VideoSnippet where
 instance FromJSON VideoSnippet
 
 data Video = Video
-    { id      :: VideoId
+    { id :: VideoId
     , snippet :: VideoSnippet
     }
     deriving (Generic, Show)
@@ -77,8 +80,9 @@ instance ToJSON Video where
 instance FromJSON Video
 
 newtype Response = Response
-  { items :: [Video]
-  } deriving (Generic, Show)
+    { items :: [Video]
+    }
+    deriving (Generic, Show)
 
 instance ToJSON Response where
     toEncoding = genericToEncoding defaultOptions
@@ -86,11 +90,13 @@ instance ToJSON Response where
 instance FromJSON Response
 
 toSong :: Response -> Maybe Queue.Song
-toSong Response { items = [] }         = Nothing
-toSong Response { items = (song : _) } = Just
-    (Queue.Song { title       = title . snippet $ song
-                , description = description . snippet $ song
-                , videoId     = videoId . id $ song
-                , thumbnail   = url . medium . thumbnails . snippet $ song
-                }
-    )
+toSong Response{items = []} = Nothing
+toSong Response{items = (song : _)} =
+    Just
+        ( Queue.Song
+            { title = title . snippet $ song
+            , description = description . snippet $ song
+            , videoId = videoId . id $ song
+            , thumbnail = url . medium . thumbnails . snippet $ song
+            }
+        )

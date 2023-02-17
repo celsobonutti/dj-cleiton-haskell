@@ -1,13 +1,13 @@
 cradle:
-  stack:
-    - path: "./src"
-      component: "dj-cleiton-rasta:lib"
+  cabal:
+    - path: "src"
+      component: "lib:dj-cleiton-rasta"
 
-    - path: "./app/Main.hs"
+    - path: "app/Main.hs"
       component: "dj-cleiton-rasta:exe:dj-cleiton-rasta-exe"
 
-    - path: "./app/Paths_dj_cleiton_rasta.hs"
+    - path: "app/Paths_dj_cleiton_rasta.hs"
       component: "dj-cleiton-rasta:exe:dj-cleiton-rasta-exe"
 
-    - path: "./test"
+    - path: "test"
       component: "dj-cleiton-rasta:test:dj-cleiton-rasta-test"
